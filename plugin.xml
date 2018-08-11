@@ -16,7 +16,6 @@
   <platform name="ios">
     <pods-config ios-min-version="9.0">
     </pods-config>
-    <pod name="LatestPod" />
     <config-file parent="/*" target="config.xml">
       <feature name="VideoConversationPlugin">
         <param name="ios-package" value="TwilioVideoPlugin"/>
