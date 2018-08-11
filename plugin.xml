@@ -14,8 +14,9 @@
   </engines>
   <dependency id="cordova-plugin-cocoapod-support"/>
   <platform name="ios">
-    <pods-config ios-min-version="9.0" use-frameworks="true">
+    <pods-config ios-min-version="9.0">
     </pods-config>
+    <pod name="LatestPod" />
     <config-file parent="/*" target="config.xml">
       <feature name="VideoConversationPlugin">
         <param name="ios-package" value="TwilioVideoPlugin"/>
@@ -44,7 +45,7 @@
     <config-file target="*-Info.plist" parent="NSMicrophoneUsageDescription">
       <string>$MICROPHONE_USAGE_DESCRIPTION</string>
     </config-file>
-    <framework src="TwilioVideo" type="podspec" spec="2.2" />
+    <pod src="TwilioVideo" spec="2.2" />
   </platform>
   <platform name="android">
     <hook type="after_plugin_install" src="plugin-hooks/after_plugin_install/hook-add-r-import.js"/>
