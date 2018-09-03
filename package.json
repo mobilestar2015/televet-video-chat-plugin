@@ -3,9 +3,16 @@
     "name": "com.ekreative.cordova.videoconversations",
     "cordova_name": "Twilio video conversation plugin",
     "license": "Apache 2.0",
-    "platforms": [
-        "android",
-        "ios"
-    ],
-    "engines": []
+    "cordova": {
+        "id": "com.ekreative.cordova.videoconversations",
+        "platforms": [
+          "ios",
+          "android"
+        ]
+    },
+    "engines": [],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mobilestar2015/televet-video-chat-plugin"
+    }
 }
