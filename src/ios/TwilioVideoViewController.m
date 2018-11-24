@@ -41,7 +41,7 @@
 
 #pragma mark UI Element Outlets and handles
 // `TVIVideoView` created from a storyboard
-@property (weak, nonatomic) IBOutlet TVIVideoView *previewView;
+@property (weak, nonatomic) IBOutlet UIView *previewView;
 
 @property (nonatomic, weak) IBOutlet UIButton *disconnectButton;
 @property (nonatomic, weak) IBOutlet UILabel *messageLabel;
@@ -218,22 +218,27 @@
         return;
     }
 
-    self.camera = [[TVICameraCapturer alloc] initWithSource:TVICameraCaptureSourceFrontCamera delegate:self];
-    self.localVideoTrack = [TVILocalVideoTrack trackWithCapturer:self.camera
-                                                         enabled:YES
-                                                     constraints:nil
-                                                            name:@"Camera"];
-    if (!self.localVideoTrack) {
-        //     [self logMessage:@"Failed to add video track"];
-    } else {
-        // Add renderer to video track for local preview
-        [self.localVideoTrack addRenderer:self.previewView];
-
-        //    [self logMessage:@"Video track created"];
-
-        UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self
-                                                                              action:@selector(flipCamera)];
-        [self.previewView addGestureRecognizer:tap];
+    self.camera = [[TVICameraCapturer alloc] initWithSource:TVICameraCaptureSourceFrontCamera delegate:self enablePreview:true];
+    
+    if (self.camera) {
+        self.localVideoTrack = [TVILocalVideoTrack trackWithCapturer:self.camera
+                                                             enabled:YES
+                                                         constraints:nil
+                                                                name:@"Camera"];
+        if (!self.localVideoTrack) {
+            //     [self logMessage:@"Failed to add video track"];
+        } else {
+            // Add renderer to video track for local preview
+            self.camera.previewView.frame = self.previewView.bounds;
+            [self.previewView addSubview:self.camera.previewView];
+            //[self.localVideoTrack addRenderer:self.previewView];
+            
+            //    [self logMessage:@"Video track created"];
+            
+            UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self
+                                                                                  action:@selector(flipCamera)];
+            [self.previewView addGestureRecognizer:tap];
+        }
     }
 }
 
@@ -280,6 +285,8 @@
                                                                           // Use the local media that we prepared earlier.
                                                                           builder.audioTracks = self.localAudioTrack ? @[ self.localAudioTrack ] : @[ ];
                                                                           builder.videoTracks = self.localVideoTrack ? @[ self.localVideoTrack ] : @[ ];
+                                                                          builder.preferredAudioCodecs = @[ [TVIIsacCodec new] ];
+                                                                          builder.preferredVideoCodecs = @[ [TVIH264Codec new] ];
 
                                                                           // The name of the Room where the Client will attempt to connect to. Please note that if you pass an empty
                                                                           // Room `name`, the Client will create one for you. You can get the name or sid from any connected Room.
@@ -552,7 +559,8 @@
 #pragma mark - TVICameraCapturerDelegate
 
 - (void)cameraCapturer:(TVICameraCapturer *)capturer didStartWithSource:(TVICameraCaptureSource)source {
-    self.previewView.mirror = (source == TVICameraCaptureSourceFrontCamera);
+    // mirror is not required when camera.previewView is used
+    //self.previewView.mirror = (source == TVICameraCaptureSourceFrontCamera);
 }
 
 @end
