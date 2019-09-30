@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -93,6 +94,33 @@ public class ConversationActivity extends AppCompatActivity {
   private VideoRenderer localVideoView;
   private boolean disconnectedFromOnDestroy;
   private boolean flashOn = false;
+
+  long startTime = 0;
+  boolean videoConnected = false;
+
+  Handler timerHandler = new Handler();
+  Runnable timerRunnable = new Runnable() {
+
+    @Override
+    public void run() {
+      long millis = System.currentTimeMillis() - startTime;
+      int seconds = (int) (millis / 1000);
+      int minutes = seconds / 60;
+      seconds = seconds % 60;
+
+      videoStatusTextView.setText(String.format("%d:%02d", minutes, seconds));
+
+      timerHandler.postDelayed(this, 500);
+    }
+  };
+
+  private void startTimer() {
+    timerHandler.postDelayed(timerRunnable, 0);
+  }
+
+  private void stopTimer() {
+    timerHandler.removeCallbacks(timerRunnable);
+  }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -181,6 +209,10 @@ public class ConversationActivity extends AppCompatActivity {
         localParticipant.addVideoTrack(localVideoTrack);
       }
     }
+
+    if (this.videoConnected) {
+        startTimer();
+    }
   }
 
   @Override
@@ -202,6 +234,10 @@ public class ConversationActivity extends AppCompatActivity {
       localVideoTrack.release();
       localVideoTrack = null;
     }
+
+    // stop timer
+    stopTimer();
+
     super.onPause();
   }
 
@@ -366,6 +402,11 @@ public class ConversationActivity extends AppCompatActivity {
      * Start listening for participant events
      */
     participant.setListener(participantListener());
+
+    // start timer
+    startTime = System.currentTimeMillis();
+    videoConnected = true;
+    startTimer();
   }
 
   /*
@@ -405,6 +446,10 @@ public class ConversationActivity extends AppCompatActivity {
     }
     participant.setListener(null);
     moveLocalVideoToPrimaryView();
+
+    // stop timer
+    videoConnected = false;
+    stopTimer();
   }
 
   private void removeParticipantVideo(VideoTrack videoTrack) {
